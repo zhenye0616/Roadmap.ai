@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: ./backend 
+      dockerfile: Dockerfile
+    container_name: ai_roadmap
+    env_file:
+       - backend/.env
+    volumes:
+      - ./backend:/usr/src/app
+    ports:
+      - "8001:8001"    # whatever port your FastAPI/Flask app listens on
+    depends_on:
+      - notion-mcp
+
+  notion-mcp:
+    image: node:18-alpine
+    container_name: notion-mcp
+    working_dir: /usr/src/mcp
+    # make sure your .cursor folder is in your build context
+    volumes:
+      - ./.cursor:/usr/src/mcp
+      - ./entrypoint.sh:/entrypoint.sh
+    command: sh /entrypoint.sh
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: skillgap-frontend
+    ports:
+      - '3000:80'
+    depends_on:
+      - app

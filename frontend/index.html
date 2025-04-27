@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parser Test</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <h1>Resume & JD Parser</h1>
+
+  <section id="resume-section">
+    <h2>Parse Resume</h2>
+    <form id="resume-form">
+      <input type="file" id="resume-file" accept=".pdf,.doc,.docx">
+      <button type="submit">Upload & Parse</button>
+    </form>
+    <pre id="resume-result">Waiting for response...</pre>
+  </section>
+
+  <section id="jd-section">
+    <h2>Parse Job Description</h2>
+    <form id="jd-form">
+      <input type="url" id="jd-url" placeholder="Enter JD URL">
+      <button type="submit">Parse JD</button>
+    </form>
+    <pre id="jd-result">Waiting for response...</pre>
+  </section>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
