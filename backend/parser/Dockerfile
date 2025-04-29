@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 # Set working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install system dependencies (if you need any)
 RUN apt-get update \

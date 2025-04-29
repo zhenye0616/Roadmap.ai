@@ -1,0 +1,7 @@
+numpy==1.21.0
+fastapi
+torch
+transformers
+sentence-transformers
+scikit-learn
+uvicorn[standard]

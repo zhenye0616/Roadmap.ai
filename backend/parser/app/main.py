@@ -1,18 +1,20 @@
 import os
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from .parse_resume import parse_resume_file_upload, parse_resume_text
+from fastapi.middleware.cors import CORSMiddleware
+#from fastapi.staticfiles import StaticFiles
+from .parseJD import extract_linkedin_job_async
+from pydantic import BaseModel
+import asyncio
+import requests
 import sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
-from fastapi import FastAPI, File, UploadFile, HTTPException, Body, Form
-from .parse_resume import parse_resume_file_upload, parse_resume_text
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from .parseJD import extract_linkedin_job_async, split_job_description
-from .llm import suggest_skill_gap
-from pydantic import BaseModel
-import asyncio
+
 
 # =========================
 app = FastAPI()
+#ML_URL = os.getenv("ML_SERVICE_URL", "http://ml:8002")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],            # or ["http://localhost:3000"]
@@ -27,7 +29,7 @@ class JDIn(BaseModel):
 
 @app.get("/", include_in_schema=False)
 async def read_root():
-    return {"status": "ok", "message": "Service is up and running"}
+    return {"status": "ok", "message": "Parsers service is up and running"}
 
 
 @app.get("/health")
@@ -65,8 +67,6 @@ async def jd_endpoint(url: str = Form(None), plain_text: str = Form(None)):
     try:
         if url:
             result = await extract_linkedin_job_async(url)
-            #print(result)
-            #result = split_job_description(plain_text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Parsing failed: {e}")
     return result
@@ -76,17 +76,9 @@ async def jd_endpoint(url: str = Form(None), plain_text: str = Form(None)):
 # Resume vs JD Comparison
 # =========================
 
-@app.post("/compare")
-async def compare(
-    resume: dict = Body(..., examples={"skills": ["Python", "SQL"]}),
-    jd: JDIn = Body(...),
-):
-    """
-    Expects:
-      - resume: output from /parse or /api/resume (JSON with 'skills', etc.)
-      - jd: { "text": "<full job description text>" }
-    Returns:
-      - { "roadmap": "<LLM output>" }
-    """
-    roadmap = suggest_skill_gap(resume, jd.text)
-    return {"roadmap": roadmap}
+# @app.post("/compare")
+# def compare_endpoint(payload: dict):
+#     # payload = {"resume_text": "...", "jd_text": "..."}
+#     resp = requests.post(f"{ML_URL}/compare", json=payload)
+#     resp.raise_for_status()
+#     return resp.json()

@@ -1,36 +1,36 @@
 services:
-  app:
+  parser:
     build:
-      context: ./backend 
+      context: ./backend/parser
       dockerfile: Dockerfile
-    container_name: ai_roadmap
+    container_name: parser
     env_file:
        - backend/.env
     volumes:
-      - ./backend:/usr/src/app
+      - ./backend/parser:/app
     ports:
       - "8001:8001"    # whatever port your FastAPI/Flask app listens on
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
     depends_on:
-      - notion-mcp
-
-  notion-mcp:
-    image: node:18-alpine
-    container_name: notion-mcp
-    working_dir: /usr/src/mcp
-    # make sure your .cursor folder is in your build context
-    volumes:
-      - ./.cursor:/usr/src/mcp
-      - ./entrypoint.sh:/entrypoint.sh
-    command: sh /entrypoint.sh
-    ports:
-      - "8000:8000"
+      - ml
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: skillgap-frontend
-    ports:
-      - '3000:80'
+    image: nginx:alpine
+    container_name: frontend
     depends_on:
-      - app
+      - parser
+      - ml
+    ports:
+      - "3000:80"
+
+      
+  ml:
+    build:
+      context: ./backend/ML
+      dockerfile: Dockerfile
+    container_name: ml_model
+    volumes:
+      - ./backend/ML:/app
+    ports:
+      - "8002:8002"
+    command: uvicorn app.ml_main:app --reload --host 0.0.0.0 --port 8002
